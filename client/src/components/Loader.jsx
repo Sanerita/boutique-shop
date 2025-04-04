@@ -1,19 +1,23 @@
 import { Spinner } from 'react-bootstrap';
 
-const Loader = () => {
+const Loader = ({ size = 100, color = 'primary', message, animation = 'border' }) => {
   return (
-    <Spinner
-      animation="border"
-      role="status"
-      style={{
-        width: '100px',
-        height: '100px',
-        margin: 'auto',
-        display: 'block',
-      }}
-    >
-      <span className="visually-hidden">Loading...</span>
-    </Spinner>
+    <div className="text-center">
+      <Spinner
+        animation={animation}
+        role="status"
+        variant={color}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          margin: 'auto',
+          display: 'block',
+        }}
+      >
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+      {message && <p className="mt-3">{message}</p>}
+    </div>
   );
 };
 
