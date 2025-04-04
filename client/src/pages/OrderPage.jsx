@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Row, Col, ListGroup, Card, Image, Alert } from 'react-bootstrap';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { Row, Col, ListGroup, Card, Image, Alert, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -12,7 +11,6 @@ import { Link } from 'react-router-dom';
 const OrderPage = () => {
   const { id: orderId } = useParams();
   const dispatch = useDispatch();
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
   const {
     order,
@@ -36,21 +34,14 @@ const OrderPage = () => {
     }
   }, [dispatch, orderId, successPay, order]);
 
-  // PayPal payment handler
-  const onApprove = (data, actions) => {
-    return actions.order.capture().then(async function (details) {
-      try {
-        await dispatch(payOrder({ orderId, details })).unwrap();
-        toast.success('Payment successful');
-      } catch (error) {
-        toast.error(error?.message || 'Payment failed');
-      }
-    });
-  };
-
-  // PayPal error handler
-  const onError = (err) => {
-    toast.error(err.message);
+  // Payment handler (for non-PayPal payment methods)
+  const handlePayment = async () => {
+    try {
+      await dispatch(payOrder({ orderId, details: {} })).unwrap();
+      toast.success('Payment successful');
+    } catch (error) {
+      toast.error(error?.message || 'Payment failed');
+    }
   };
 
   return loading ? (
@@ -80,7 +71,7 @@ const OrderPage = () => {
               </p>
               {order.isDelivered ? (
                 <Message variant="success">
-                  Delivered on {order.deliveredAt}
+                  Delivered on {new Date(order.deliveredAt).toLocaleString()}
                 </Message>
               ) : (
                 <Message variant="danger">Not Delivered</Message>
@@ -94,7 +85,9 @@ const OrderPage = () => {
                 {order.paymentMethod}
               </p>
               {order.isPaid ? (
-                <Message variant="success">Paid on {order.paidAt}</Message>
+                <Message variant="success">
+                  Paid on {new Date(order.paidAt).toLocaleString()}
+                </Message>
               ) : (
                 <Message variant="danger">Not Paid</Message>
               )}
@@ -118,7 +111,7 @@ const OrderPage = () => {
                           />
                         </Col>
                         <Col>
-                          <Link to={`/product/${item._id}`}>{item.name}</Link>
+                          <Link to={`/product/${item.product}`}>{item.name}</Link>
                         </Col>
                         <Col md={4}>
                           {item.qty} x ${item.price} = ${(item.qty * item.price).toFixed(2)}
@@ -164,28 +157,25 @@ const OrderPage = () => {
               {!order.isPaid && (
                 <ListGroup.Item>
                   {loadingPay && <Loader />}
-                  {order.paymentMethod === 'PayPal' && (
-                    <div>
-                      {isPending ? (
-                        <Loader />
-                      ) : (
-                        <PayPalButtons
-                          createOrder={(data, actions) => {
-                            return actions.order.create({
-                              purchase_units: [
-                                {
-                                  amount: {
-                                    value: order.totalPrice,
-                                  },
-                                },
-                              ],
-                            });
-                          }}
-                          onApprove={onApprove}
-                          onError={onError}
-                        />
-                      )}
+                  {order.paymentMethod === 'PayPal' ? (
+                    <div className="text-center">
+                      <Message>PayPal integration would appear here</Message>
+                      <Button
+                        variant="primary"
+                        onClick={handlePayment}
+                        disabled={loadingPay}
+                      >
+                        {loadingPay ? 'Processing...' : 'Simulate PayPal Payment'}
+                      </Button>
                     </div>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={handlePayment}
+                      disabled={loadingPay}
+                    >
+                      {loadingPay ? 'Processing...' : 'Mark as Paid'}
+                    </Button>
                   )}
                 </ListGroup.Item>
               )}
