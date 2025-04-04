@@ -2,12 +2,22 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+// Helper function to handle localStorage
+const persistAuthState = (userInfo) => {
+  if (userInfo) {
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+  } else {
+    localStorage.removeItem('userInfo');
+  }
+};
+
 // Async thunk for user login
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post('/api/users/login', { email, password });
+      persistAuthState(data);
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -23,6 +33,7 @@ export const register = createAsyncThunk(
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post('/api/users', { name, email, password });
+      persistAuthState(data);
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -40,9 +51,10 @@ export const getUserDetails = createAsyncThunk(
       const { auth } = getState();
       const { data } = await axios.get('/api/users/profile', {
         headers: {
-          Authorization: `Bearer ${auth.userInfo.token}`,
+          Authorization: `Bearer ${auth.userInfo?.token}`,
         },
       });
+      persistAuthState(data);
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -55,18 +67,19 @@ export const getUserDetails = createAsyncThunk(
 // Async thunk for updating user profile
 export const updateUserProfile = createAsyncThunk(
   'auth/updateUserProfile',
-  async ({ name, email, password }, { getState, rejectWithValue }) => {
+  async (userData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
       const { data } = await axios.put(
         '/api/users/profile',
-        { name, email, password },
+        userData,
         {
           headers: {
-            Authorization: `Bearer ${auth.userInfo.token}`,
+            Authorization: `Bearer ${auth.userInfo?.token}`,
           },
         }
       );
+      persistAuthState({ ...auth.userInfo, ...data });
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -76,8 +89,11 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+// Initialize state from localStorage
 const initialState = {
-  userInfo: null,
+  userInfo: localStorage.getItem('userInfo')
+    ? JSON.parse(localStorage.getItem('userInfo'))
+    : null,
   loading: false,
   error: null,
 };
@@ -90,10 +106,11 @@ const authSlice = createSlice({
       state.userInfo = null;
       state.loading = false;
       state.error = null;
-      localStorage.removeItem('userInfo');
+      persistAuthState(null);
     },
     setCredentials: (state, action) => {
       state.userInfo = action.payload;
+      persistAuthState(action.payload);
     },
     clearError: (state) => {
       state.error = null;
@@ -101,56 +118,39 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Login
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.userInfo = action.payload;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+      .addMatcher(
+        (action) => action.type.endsWith('/pending'),
+        (state) => {
+          state.loading = true;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/rejected'),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+          toast.error(action.payload);
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/fulfilled'),
+        (state, action) => {
+          state.loading = false;
+        }
+      )
       
-      // Register
-      .addCase(register.pending, (state) => {
-        state.loading = true;
+      // Specific cases for actions that update userInfo
+      .addCase(login.fulfilled, (state, action) => {
+        state.userInfo = action.payload;
       })
       .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
         state.userInfo = action.payload;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      
-      // Get User Details
-      .addCase(getUserDetails.pending, (state) => {
-        state.loading = true;
       })
       .addCase(getUserDetails.fulfilled, (state, action) => {
-        state.loading = false;
         state.userInfo = action.payload;
-      })
-      .addCase(getUserDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      
-      // Update User Profile
-      .addCase(updateUserProfile.pending, (state) => {
-        state.loading = true;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.userInfo = action.payload;
-      })
-      .addCase(updateUserProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.userInfo = { ...state.userInfo, ...action.payload };
       });
   },
 });
