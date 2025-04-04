@@ -1,12 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Components
 import Header from './components/Header';
 import Footer from './components/Footer';
+import PrivateRoute from './components/PrivateRoute';
+
+// Pages
 import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
 import LoginPage from './pages/LoginPage';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
+import ShippingPage from './pages/ShippingPage';
+import PaymentPage from './pages/PaymentPage';
+import PlaceOrderPage from './pages/PlaceOrderPage';
+import OrderPage from './pages/OrderPage';
+import UserListPage from './pages/admin/UserListPage';
+import ProductListPage from './pages/admin/ProductListPage';
+import ProductEditPage from './pages/admin/ProductEditPage';
+import OrderListPage from './pages/admin/OrderListPage';
 
 function App() {
   return (
@@ -14,11 +31,46 @@ function App() {
       <Header />
       <main className="py-3">
         <Container>
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<HomePage />} exact />
+            <Route path="/search/:keyword" element={<HomePage />} />
+            <Route path="/page/:pageNumber" element={<HomePage />} />
+            <Route path="/search/:keyword/page/:pageNumber" element={<HomePage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/cart/:id" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected User Routes */}
+            <Route path="" element={<PrivateRoute />}>
+              <Route path="/shipping" element={<ShippingPage />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/placeorder" element={<PlaceOrderPage />} />
+              <Route path="/order/:id" element={<OrderPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="" element={<PrivateRoute admin={true} />}>
+              <Route path="/admin/userlist" element={<UserListPage />} />
+              <Route path="/admin/productlist" element={<ProductListPage />} exact />
+              <Route path="/admin/productlist/:pageNumber" element={<ProductListPage />} exact />
+              <Route path="/admin/product/:id/edit" element={<ProductEditPage />} />
+              <Route path="/admin/orderlist" element={<OrderListPage />} />
+            </Route>
           </Routes>
         </Container>
       </main>
