@@ -1,9 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  cartItems: localStorage.getItem('cartItems')
-    ? JSON.parse(localStorage.getItem('cartItems'))
-    : [],
+  cartItems: [],
+  shippingAddress: {},
+  paymentMethod: 'PayPal',
+  itemsPrice: 0,
+  shippingPrice: 0,
+  taxPrice: 0,
+  totalPrice: 0,
 };
 
 const cartSlice = createSlice({
@@ -19,17 +23,66 @@ const cartSlice = createSlice({
           x._id === existItem._id ? item : x
         );
       } else {
-        state.cartItems.push(item);
+        state.cartItems = [...state.cartItems, item];
       }
-      
-      localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
+
+      // Calculate prices
+      calculatePrices(state);
     },
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter((x) => x._id !== action.payload);
-      localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
+      calculatePrices(state);
+    },
+    saveShippingAddress: (state, action) => {
+      state.shippingAddress = action.payload;
+    },
+    savePaymentMethod: (state, action) => {
+      state.paymentMethod = action.payload;
+    },
+    clearCartItems: (state) => {
+      state.cartItems = [];
+      calculatePrices(state);
+    },
+    // Reset cart after order is placed
+    resetCart: (state) => {
+      state.cartItems = [];
+      state.shippingAddress = {};
+      state.paymentMethod = 'PayPal';
+      state.itemsPrice = 0;
+      state.shippingPrice = 0;
+      state.taxPrice = 0;
+      state.totalPrice = 0;
     },
   },
 });
 
-export const { addToCart, removeFromCart } = cartSlice.actions;
+// Helper function to calculate all prices
+const calculatePrices = (state) => {
+  const itemsPrice = state.cartItems.reduce(
+    (acc, item) => acc + item.price * item.qty,
+    0
+  );
+  state.itemsPrice = itemsPrice;
+
+  // Shipping price logic (free shipping over $100, else $10)
+  state.shippingPrice = itemsPrice > 100 ? 0 : 10;
+
+  // Tax price (15% tax rate)
+  state.taxPrice = Number((0.15 * itemsPrice).toFixed(2));
+
+  // Total price
+  state.totalPrice = Number(
+    (itemsPrice + state.shippingPrice + state.taxPrice).toFixed(2)
+  );
+};
+
+export const {
+  addToCart,
+  removeFromCart,
+  saveShippingAddress,
+  savePaymentMethod,
+  clearCartItems,
+  resetCart,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;
