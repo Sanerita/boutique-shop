@@ -12,9 +12,12 @@ export const usersApiSlice = createApi({
       return headers;
     },
   }),
+  tagTypes: ['User'],
   endpoints: (builder) => ({
+    // User Profile Endpoints
     getUserDetails: builder.query({
       query: () => '/profile',
+      providesTags: ['User'],
     }),
     updateUserProfile: builder.mutation({
       query: (data) => ({
@@ -22,6 +25,46 @@ export const usersApiSlice = createApi({
         method: 'PUT',
         body: data,
       }),
+      invalidatesTags: ['User'],
+    }),
+
+    // Admin User Management Endpoints
+    getUsers: builder.query({
+      query: () => '/',
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'User', id })),
+              { type: 'User', id: 'LIST' },
+            ]
+          : [{ type: 'User', id: 'LIST' }],
+    }),
+    getUserById: builder.query({
+      query: (id) => `/${id}`,
+      providesTags: (result, error, id) => [{ type: 'User', id }],
+    }),
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'User', id }],
+    }),
+    updateUser: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
+    }),
+    createUser: builder.mutation({
+      query: (data) => ({
+        url: '/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'User', id: 'LIST' }],
     }),
   }),
 });
@@ -29,4 +72,9 @@ export const usersApiSlice = createApi({
 export const { 
   useGetUserDetailsQuery,
   useUpdateUserProfileMutation,
+  useGetUsersQuery,
+  useGetUserByIdQuery,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+  useCreateUserMutation,
 } = usersApiSlice;
