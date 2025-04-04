@@ -24,9 +24,14 @@ const LoginPage = () => {
     }
   }, [navigate, userInfo, redirect]);
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    try {
+      await dispatch(login({ email, password })).unwrap();
+      navigate(redirect);
+    } catch (error) {
+      toast.error(error || 'Login failed');
+    }
   };
 
   return (
