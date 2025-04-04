@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Row, Col } from 'react-bootstrap';
-import ProductCard from '../components/ProductCard';
+import Product from '../components/Product';
 import axios from 'axios';
 
 const HomePage = () => {
@@ -9,14 +9,9 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get('/api/products');
-        setProducts(data);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
+      const { data } = await axios.get('/api/products');
+      setProducts(data);
+      setLoading(false);
     };
 
     fetchProducts();
@@ -31,7 +26,7 @@ const HomePage = () => {
         <Row>
           {products.map((product) => (
             <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
-              <ProductCard product={product} />
+              <Product product={product} />
             </Col>
           ))}
         </Row>
