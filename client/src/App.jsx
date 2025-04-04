@@ -89,7 +89,6 @@ function App() {
               
               <Route path="/admin/orderlist" element={<OrderListPage />} />
               <Route path="/admin/orderlist/:pageNumber" element={<OrderListPage />} />
-              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* Not Found Route */}
