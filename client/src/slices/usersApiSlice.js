@@ -14,7 +14,20 @@ export const usersApiSlice = createApi({
   }),
   tagTypes: ['User'],
   endpoints: (builder) => ({
-    // User Profile Endpoints
+    login: builder.mutation({
+      query: (credentials) => ({
+        url: '/login',
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
+    register: builder.mutation({
+      query: (userData) => ({
+        url: '',
+        method: 'POST',
+        body: userData,
+      }),
+    }),
     getUserDetails: builder.query({
       query: () => '/profile',
       providesTags: ['User'],
@@ -27,54 +40,39 @@ export const usersApiSlice = createApi({
       }),
       invalidatesTags: ['User'],
     }),
-
-    // Admin User Management Endpoints
     getUsers: builder.query({
-      query: () => '/',
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: 'User', id })),
-              { type: 'User', id: 'LIST' },
-            ]
-          : [{ type: 'User', id: 'LIST' }],
-    }),
-    getUserById: builder.query({
-      query: (id) => `/${id}`,
-      providesTags: (result, error, id) => [{ type: 'User', id }],
+      query: () => '',
+      providesTags: ['User'],
     }),
     deleteUser: builder.mutation({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (userId) => ({
+        url: `/${userId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'User', id }],
+      invalidatesTags: ['User'],
+    }),
+    getUserById: builder.query({
+      query: (userId) => `/${userId}`,
+      providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
     }),
     updateUser: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `/${id}`,
+      query: ({ userId, userData }) => ({
+        url: `/${userId}`,
         method: 'PUT',
-        body: data,
+        body: userData,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
-    }),
-    createUser: builder.mutation({
-      query: (data) => ({
-        url: '/',
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: [{ type: 'User', id: 'LIST' }],
+      invalidatesTags: (result, error, { userId }) => [{ type: 'User', id: userId }],
     }),
   }),
 });
 
-export const { 
+export const {
+  useLoginMutation,
+  useRegisterMutation,
   useGetUserDetailsQuery,
   useUpdateUserProfileMutation,
   useGetUsersQuery,
-  useGetUserByIdQuery,
   useDeleteUserMutation,
+  useGetUserByIdQuery,
   useUpdateUserMutation,
-  useCreateUserMutation,
 } = usersApiSlice;

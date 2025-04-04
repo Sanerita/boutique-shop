@@ -12,21 +12,46 @@ export const ordersApiSlice = createApi({
       return headers;
     },
   }),
+  tagTypes: ['Order'],
   endpoints: (builder) => ({
-    createOrder: builder.mutation({
-      query: (order) => ({
-        url: '/',
-        method: 'POST',
-        body: order,
-      }),
+    getOrders: builder.query({
+      query: () => '',
+      providesTags: ['Order'],
     }),
     getOrderDetails: builder.query({
       query: (id) => `/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Order', id }],
+    }),
+    createOrder: builder.mutation({
+      query: (order) => ({
+        url: '',
+        method: 'POST',
+        body: order,
+      }),
+      invalidatesTags: ['Order'],
+    }),
+    payOrder: builder.mutation({
+      query: ({ orderId, details }) => ({
+        url: `/${orderId}/pay`,
+        method: 'PUT',
+        body: details,
+      }),
+      invalidatesTags: (result, error, { orderId }) => [{ type: 'Order', id: orderId }],
+    }),
+    deliverOrder: builder.mutation({
+      query: (orderId) => ({
+        url: `/${orderId}/deliver`,
+        method: 'PUT',
+      }),
+      invalidatesTags: (result, error, orderId) => [{ type: 'Order', id: orderId }],
     }),
   }),
 });
 
-export const { 
-  useCreateOrderMutation, 
-  useGetOrderDetailsQuery 
+export const {
+  useGetOrdersQuery,
+  useGetOrderDetailsQuery,
+  useCreateOrderMutation,
+  usePayOrderMutation,
+  useDeliverOrderMutation,
 } = ordersApiSlice;
