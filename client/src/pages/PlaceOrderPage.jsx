@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { createOrder } from '../slices/ordersSlice';
+import { resetCart } from '../slices/cartSlice';
 import CheckoutSteps from '../components/CheckoutSteps';
 
 const PlaceOrderPage = () => {
@@ -13,26 +14,36 @@ const PlaceOrderPage = () => {
   const navigate = useNavigate();
 
   const cart = useSelector((state) => state.cart);
-  const { order, isLoading, error } = useSelector((state) => state.orders);
+  const { order, loading, error } = useSelector((state) => state.orders);
 
+  // Calculate prices if not already set
   useEffect(() => {
-    if (!cart.shippingAddress) {
+    if (!cart.shippingAddress.address) {
       navigate('/shipping');
     } else if (!cart.paymentMethod) {
       navigate('/payment');
     }
-  }, [cart.paymentMethod, cart.shippingAddress, navigate]);
+  }, [cart, navigate]);
 
-  const placeOrderHandler = () => {
-    dispatch(createOrder({
-      orderItems: cart.cartItems,
-      shippingAddress: cart.shippingAddress,
-      paymentMethod: cart.paymentMethod,
-      itemsPrice: cart.itemsPrice,
-      shippingPrice: cart.shippingPrice,
-      taxPrice: cart.taxPrice,
-      totalPrice: cart.totalPrice,
-    }));
+  const placeOrderHandler = async () => {
+    try {
+      const res = await dispatch(
+        createOrder({
+          orderItems: cart.cartItems,
+          shippingAddress: cart.shippingAddress,
+          paymentMethod: cart.paymentMethod,
+          itemsPrice: cart.itemsPrice,
+          shippingPrice: cart.shippingPrice,
+          taxPrice: cart.taxPrice,
+          totalPrice: cart.totalPrice,
+        })
+      ).unwrap();
+
+      dispatch(resetCart());
+      navigate(`/order/${res._id}`);
+    } catch (error) {
+      toast.error(error);
+    }
   };
 
   return (
@@ -40,7 +51,6 @@ const PlaceOrderPage = () => {
       <CheckoutSteps step1 step2 step3 step4 />
       <Row>
         <Col md={8}>
-          {/* Shipping Address */}
           <ListGroup variant="flush">
             <ListGroup.Item>
               <h2>Shipping</h2>
@@ -51,14 +61,12 @@ const PlaceOrderPage = () => {
               </p>
             </ListGroup.Item>
 
-            {/* Payment Method */}
             <ListGroup.Item>
               <h2>Payment Method</h2>
               <strong>Method: </strong>
               {cart.paymentMethod}
             </ListGroup.Item>
 
-            {/* Order Items */}
             <ListGroup.Item>
               <h2>Order Items</h2>
               {cart.cartItems.length === 0 ? (
@@ -72,7 +80,7 @@ const PlaceOrderPage = () => {
                           <Image src={item.image} alt={item.name} fluid rounded />
                         </Col>
                         <Col>
-                          <Link to={`/product/${item.product}`}>{item.name}</Link>
+                          <Link to={`/product/${item._id}`}>{item.name}</Link>
                         </Col>
                         <Col md={4}>
                           {item.qty} x ${item.price} = ${(item.qty * item.price).toFixed(2)}
@@ -94,25 +102,25 @@ const PlaceOrderPage = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>${cart.itemsPrice}</Col>
+                  <Col>${cart.itemsPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping</Col>
-                  <Col>${cart.shippingPrice}</Col>
+                  <Col>${cart.shippingPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Tax</Col>
-                  <Col>${cart.taxPrice}</Col>
+                  <Col>${cart.taxPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>${cart.totalPrice}</Col>
+                  <Col>${cart.totalPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
@@ -122,12 +130,11 @@ const PlaceOrderPage = () => {
                 <Button
                   type="button"
                   className="btn-block"
-                  disabled={cart.cartItems.length === 0}
+                  disabled={cart.cartItems.length === 0 || loading}
                   onClick={placeOrderHandler}
                 >
-                  Place Order
+                  {loading ? 'Processing...' : 'Place Order'}
                 </Button>
-                {isLoading && <Loader />}
               </ListGroup.Item>
             </ListGroup>
           </Card>
