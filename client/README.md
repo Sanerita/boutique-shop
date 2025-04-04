@@ -1,12 +1,23 @@
-# React + Vite
+# Boutique Shop - E-commerce Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack e-commerce application built with:
+- Frontend: React, Vite, Bootstrap
+- Backend: Node.js, Express, MongoDB
+- Payment: Stripe integration
 
-Currently, two official plugins are available:
+## Setup Instructions
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Backend
+1. Navigate to `/server` folder
+2. Create `.env` file with your variables
+3. Run `npm install`
+4. Run `npm start`
 
-## Expanding the ESLint configuration
+### Frontend
+1. Navigate to `/client` folder
+2. Run `npm install`
+3. Run `npm run dev`
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Environment Variables
+
+`/server/.env`
