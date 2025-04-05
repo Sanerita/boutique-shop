@@ -28,10 +28,10 @@ const Footer = () => {
 
   const serviceLinks = [
     { path: "/ReturnsPage", name: "Returns & Exchanges" },
-    { path: "/shipping", name: "Shipping Policy" },
-    { path: "/privacy", name: "Privacy Policy" },
-    { path: "/terms", name: "Terms of Service" },
-    { path: "/faq", name: "FAQ" }
+    { path: "/ShippingPage", name: "Shipping Policy" },
+    { path: "/PrivacyPage", name: "Privacy Policy" },
+    { path: "/TermsPage", name: "Terms of Service" },
+    { path: "/FAQPage", name: "FAQ" }
   ];
 
   // Helper function to check if link is active

@@ -28,6 +28,11 @@ import NotFoundPage from './pages/NotFoundPage';
 import WishlistPage from './pages/WishlistPage';
 import ShopPage from './pages/ShopPage';
 
+// Policy Pages
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import FAQPage from './pages/FAQPage';
+
 // Admin Pages
 import UserListPage from './pages/admin/UserListPage';
 import UserEditPage from './pages/admin/UserEditPage';
@@ -71,11 +76,16 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/loading" element={<Loader fullPage />} />
+            
+            {/* Policy Pages */}
+            <Route path="/shipping" element={<ShippingPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/faq" element={<FAQPage />} />
 
             {/* Protected User Routes */}
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="" element={<PrivateRoute />}>
-              <Route path="/shipping" element={<ShippingPage />} />
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/placeorder" element={<PlaceOrderPage />} />
               <Route path="/order/:id" element={<OrderPage />} />
