@@ -1,11 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Components
-import Header from './components/Header';
+import Header from './components/Header.jsx';
 import Footer from './components/Footer';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -35,7 +35,7 @@ import OrderListPage from './pages/admin/OrderListPage';
 
 function App() {
   return (
-    <Router>
+    <>
       <Meta />
       <Header />
       <main className="py-3">
@@ -97,7 +97,7 @@ function App() {
         </Container>
       </main>
       <Footer />
-    </Router>
+    </>
   );
 }
 

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { FaUpload, FaTimes } from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import FormContainer from '../../components/FormContainer';
@@ -26,6 +27,12 @@ const ProductCreatePage = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    
+    if (!image) {
+      toast.error('Please upload an image');
+      return;
+    }
+
     try {
       await createProduct({
         name,
@@ -36,6 +43,7 @@ const ProductCreatePage = () => {
         countInStock,
         description
       }).unwrap();
+      
       toast.success('Product created successfully');
       navigate('/admin/productlist');
     } catch (err) {
@@ -44,120 +52,186 @@ const ProductCreatePage = () => {
   };
 
   const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.match('image.*')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('image', e.target.files[0]);
+    formData.append('image', file);
+    
     try {
       const res = await uploadProductImage(formData).unwrap();
-      toast.success(res.message);
+      toast.success('Image uploaded successfully');
       setImage(res.image);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
 
+  const removeImageHandler = () => {
+    setImage('');
+  };
+
   return (
     <Container>
-      <Link to="/admin/productlist" className="btn btn-light my-3">
-        Go Back
-      </Link>
-      <FormContainer>
-        <h1>Create Product</h1>
-        {loadingCreate && <Loader />}
-        <Form onSubmit={submitHandler}>
-          <Form.Group controlId="name" className="my-3">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </Form.Group>
+      <Row className="justify-content-md-center">
+        <Col md={12}>
+          <Card className="p-4">
+            <Link to="/admin/productlist" className="btn btn-light mb-4">
+              Go Back to Products
+            </Link>
+            
+            <FormContainer>
+              <h1 className="text-center mb-4">Create New Product</h1>
+              
+              {loadingCreate && <Loader />}
+              
+              <Form onSubmit={submitHandler}>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group controlId="name" className="mb-3">
+                      <Form.Label>Product Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter product name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
 
-          <Form.Group controlId="price" className="my-3">
-            <Form.Label>Price</Form.Label>
-            <Form.Control
-              type="number"
-              placeholder="Enter price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
-          </Form.Group>
+                    <Form.Group controlId="price" className="mb-3">
+                      <Form.Label>Price</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Enter price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
 
-          <Form.Group controlId="image" className="my-3">
-            <Form.Label>Image</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter image URL"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-            />
-            <Form.Control
-              type="file"
-              label="Choose File"
-              onChange={uploadFileHandler}
-              className="mt-2"
-            />
-            {loadingUpload && <Loader />}
-          </Form.Group>
+                    <Form.Group controlId="brand" className="mb-3">
+                      <Form.Label>Brand</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter brand"
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
 
-          <Form.Group controlId="brand" className="my-3">
-            <Form.Label>Brand</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter brand"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              required
-            />
-          </Form.Group>
+                  <Col md={6}>
+                    <Form.Group controlId="image" className="mb-3">
+                      <Form.Label>Product Image</Form.Label>
+                      {image ? (
+                        <div className="position-relative mb-3">
+                          <img 
+                            src={image} 
+                            alt="Preview" 
+                            className="img-fluid rounded"
+                            style={{ maxHeight: '200px' }}
+                          />
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0 m-1"
+                            onClick={removeImageHandler}
+                          >
+                            <FaTimes />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border rounded p-4 text-center">
+                          <p className="text-muted">No image selected</p>
+                        </div>
+                      )}
+                      
+                      <div className="d-flex align-items-center mt-2">
+                        <Form.Control
+                          type="file"
+                          accept="image/*"
+                          onChange={uploadFileHandler}
+                          className="d-none"
+                          id="image-upload"
+                        />
+                        <Button
+                          as="label"
+                          htmlFor="image-upload"
+                          variant="outline-secondary"
+                          className="me-2"
+                        >
+                          <FaUpload className="me-1" /> Upload Image
+                        </Button>
+                        {loadingUpload && <Loader small />}
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-          <Form.Group controlId="countInStock" className="my-3">
-            <Form.Label>Count In Stock</Form.Label>
-            <Form.Control
-              type="number"
-              placeholder="Enter count in stock"
-              value={countInStock}
-              onChange={(e) => setCountInStock(e.target.value)}
-              required
-            />
-          </Form.Group>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group controlId="category" className="mb-3">
+                      <Form.Label>Category</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group controlId="countInStock" className="mb-3">
+                      <Form.Label>Stock Quantity</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        placeholder="Enter quantity in stock"
+                        value={countInStock}
+                        onChange={(e) => setCountInStock(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-          <Form.Group controlId="category" className="my-3">
-            <Form.Label>Category</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
-          </Form.Group>
+                <Form.Group controlId="description" className="mb-4">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={5}
+                    placeholder="Enter detailed product description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                  />
+                </Form.Group>
 
-          <Form.Group controlId="description" className="my-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              placeholder="Enter description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </Form.Group>
-
-          <Button 
-            type="submit" 
-            variant="primary" 
-            className="my-3"
-            disabled={loadingCreate}
-          >
-            Create Product
-          </Button>
-        </Form>
-      </FormContainer>
+                <div className="d-grid">
+                  <Button 
+                    type="submit" 
+                    variant="primary" 
+                    size="lg"
+                    disabled={loadingCreate || loadingUpload || !image}
+                  >
+                    {loadingCreate ? 'Creating...' : 'Create Product'}
+                  </Button>
+                </div>
+              </Form>
+            </FormContainer>
+          </Card>
+        </Col>
+      </Row>
     </Container>
   );
 };
