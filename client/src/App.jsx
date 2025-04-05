@@ -13,6 +13,7 @@ import Meta from './components/Meta';
 import Loader from './components/Loader';
 
 // Pages
+import ReturnsPage from './pages/ReturnsPage';
 import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
@@ -24,6 +25,8 @@ import PaymentPage from './pages/PaymentPage';
 import PlaceOrderPage from './pages/PlaceOrderPage';
 import OrderPage from './pages/OrderPage';
 import NotFoundPage from './pages/NotFoundPage';
+import WishlistPage from './pages/WishlistPage';
+import ShopPage from './pages/ShopPage';
 
 // Admin Pages
 import UserListPage from './pages/admin/UserListPage';
@@ -55,6 +58,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
             <Route path="/search/:keyword" element={<HomePage />} />
             <Route path="/page/:pageNumber" element={<HomePage />} />
             <Route
@@ -69,12 +73,14 @@ function App() {
             <Route path="/loading" element={<Loader fullPage />} />
 
             {/* Protected User Routes */}
+            <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="" element={<PrivateRoute />}>
               <Route path="/shipping" element={<ShippingPage />} />
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/placeorder" element={<PlaceOrderPage />} />
               <Route path="/order/:id" element={<OrderPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/ReturnsPage" element={<ReturnsPage />} />
             </Route>
 
             {/* Admin Routes */}

@@ -1,0 +1,103 @@
+/* Hero Carousel */
+.hero-carousel {
+  position: relative;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.hero-carousel .carousel {
+  height: 100%;
+}
+
+.hero-carousel .carousel-inner {
+  height: 100%;
+}
+
+.hero-carousel .carousel-item {
+  height: 100%;
+}
+
+.hero-slide {
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.hero-carousel .container {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Collection Cards */
+.collection-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.collection-card img {
+  transition: transform 0.5s ease;
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.collection-card:hover img {
+  transform: scale(1.05);
+}
+
+.collection-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+}
+
+/* Spacing Utilities */
+.py-6 {
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important;
+}
+
+.mb-6 {
+  margin-bottom: 5rem !important;
+}
+
+/* Typography */
+.display-5 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.fw-light {
+  font-weight: 300 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .hero-carousel {
+    height: 70vh;
+  }
+  
+  .display-5 {
+    font-size: 2rem;
+  }
+}
